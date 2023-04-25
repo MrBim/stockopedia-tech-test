@@ -6,5 +6,5 @@ export type Expression ={
 
 export interface DSL {
   "expression": Expression,
-  "security": string
+  "security": string,
 };

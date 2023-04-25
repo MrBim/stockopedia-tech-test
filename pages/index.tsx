@@ -106,7 +106,8 @@ const Home: NextPage = () => {
 
   const validSecurities = useMemo(() => {
     return securities.map((it: Security) => it.symbol);
-  }, [])
+  }, []);
+
   const checkSecurityValidity = (expression: string): boolean => {
     if (!expression) return false;
     const parsed = JSON.parse(expression);
@@ -123,12 +124,12 @@ const Home: NextPage = () => {
     const hasSecurity = validJSON && validDSL ? checkSecurityValidity(expression) : false;
 
     if (validDSL && validJSON && hasSecurity) {
-      setExpressionIsValid(true)
+      setExpressionIsValid(true);
     } else {
-      setExpressionIsValid(false)
+      setExpressionIsValid(false);
     };
 
-  }, [expression])
+  }, [expression]);
 
   return (
     <>
@@ -188,14 +189,14 @@ const Home: NextPage = () => {
           ></textarea>
 
           {isSuccessfulExpression ?
-            <div className={[styles.message, styles.messageSuccess].join(" ")}>
+            <div data-testid="expression-success" className={[styles.message, styles.messageSuccess].join(" ")}>
               DSL query ran successfully!
             </div>
             : null
           }
 
           {!ExpressionIsValid ?
-            <div className={[styles.message, styles.messageError].join(" ")}>
+            <div data-testid="expression-invalid" className={[styles.message, styles.messageError].join(" ")}>
               There is a problem with your DSL query.
             </div> : null
           }
@@ -215,6 +216,7 @@ const Home: NextPage = () => {
           <label htmlFor="dsl-output">Output:</label>
           <textarea
             id="dsl-output"
+            data-testid="expression-output"
             className={styles.field}
             readOnly
             rows={1}

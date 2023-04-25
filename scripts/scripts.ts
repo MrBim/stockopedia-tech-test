@@ -15,7 +15,7 @@ const getValue = (attribute: Expression, securityId: number): null | number => {
       const attId = attributes.filter((it) => it.name === attribute.a)[0].id;
       a = facts.filter((it) => it.security_id === securityId && it.attribute_id === attId)[0].value;
     } else {
-      const expression = getValue(attribute.a as Expression, securityId)
+      const expression = getValue(attribute.a as Expression, securityId);
       a = expression;
     }
 
@@ -26,8 +26,7 @@ const getValue = (attribute: Expression, securityId: number): null | number => {
       const attId = attributes.filter((it) => it.name === attribute.b)[0].id;
       b = facts.filter((it) => it.security_id === securityId && it.attribute_id === attId)[0].value;
     } else {
-      const thing = getValue(attribute.b as Expression, securityId)
-      b = thing;
+      b = getValue(attribute.b as Expression, securityId);
     }
 
     if (a === null || b === null) return null;
@@ -49,10 +48,9 @@ const getValue = (attribute: Expression, securityId: number): null | number => {
         return null;
     }
   } catch (e) {
-    return null
+    return null;
   }
 }
-
 
 export const handleRecursiveExpression = (expression: string): string | number => {
   const parsedExpression = JSON.parse(expression) as DSL;
