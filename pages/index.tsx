@@ -1,7 +1,11 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState, useMemo } from "react";
 import styles from "./index.module.css";
+import { handleRecursiveExpression } from "../scripts/scripts";
+import { Security } from "../models/security";
+import securities from "../data/securities.json";
+
 
 interface DSLExample {
   id: string;
@@ -68,6 +72,64 @@ const Home: NextPage = () => {
   const [expression, setExpression] = useState<string>(examples[0].dsl);
   const setDsl = (dsl: string) => () => setExpression(dsl);
 
+  const [ExpressionIsValid, setExpressionIsValid] = useState(true);
+  const [isSuccessfulExpression, setIsSuccessfulExpression] = useState(false);
+  const [outputValue, setOutputValue] = useState<string | number>('');
+
+  const handleRunClick = () => {
+    const resolvedExpression = handleRecursiveExpression(expression);
+    setOutputValue(resolvedExpression);
+    if (typeof resolvedExpression === 'number') {
+      setIsSuccessfulExpression(true);
+    }
+  };
+
+  const checkIsValidJSON = (jsonString: string): boolean => {
+    try {
+      const parsedJSON = JSON.parse(jsonString);
+      if (parsedJSON && typeof parsedJSON === "object") return true;
+    }
+    catch (e) { };
+    return false;
+  };
+
+  const checkIsValidDSL = (expression: string): boolean => {
+    if (!expression) return false;
+    const parsed = JSON.parse(expression);
+    const keys = Object.keys(parsed);
+    if (keys.includes('security') && keys.includes('expression')) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  const validSecurities = useMemo(() => {
+    return securities.map((it: Security) => it.symbol);
+  }, [])
+  const checkSecurityValidity = (expression: string): boolean => {
+    if (!expression) return false;
+    const parsed = JSON.parse(expression);
+    if (validSecurities.includes(parsed.security)) return true;
+    return false;
+  };
+
+  useEffect(() => {
+    setOutputValue('');
+    setIsSuccessfulExpression(false);
+
+    const validJSON = checkIsValidJSON(expression);
+    const validDSL = validJSON ? checkIsValidDSL(expression) : false;
+    const hasSecurity = validJSON && validDSL ? checkSecurityValidity(expression) : false;
+
+    if (validDSL && validJSON && hasSecurity) {
+      setExpressionIsValid(true)
+    } else {
+      setExpressionIsValid(false)
+    };
+
+  }, [expression])
+
   return (
     <>
       <Head>
@@ -124,15 +186,28 @@ const Home: NextPage = () => {
             }
             rows={8}
           ></textarea>
-          <div className={[styles.message, styles.messageSuccess].join(" ")}>
-            DSL query ran successfully!
-          </div>
-          <div className={[styles.message, styles.messageError].join(" ")}>
-            There is a problem with your DSL query.
-          </div>
-          <button data-testid="run-button" type="button">
-            Run
-          </button>
+
+          {isSuccessfulExpression ?
+            <div className={[styles.message, styles.messageSuccess].join(" ")}>
+              DSL query ran successfully!
+            </div>
+            : null
+          }
+
+          {!ExpressionIsValid ?
+            <div className={[styles.message, styles.messageError].join(" ")}>
+              There is a problem with your DSL query.
+            </div> : null
+          }
+
+          {ExpressionIsValid
+            ? <button data-testid="run-button" type="button" onClick={handleRunClick}>
+              Run
+            </button>
+            : <button data-testid="run-button" type="button" disabled>
+              Run
+            </button>
+          }
         </div>
 
         {/* DSL Output Section */}
@@ -143,6 +218,7 @@ const Home: NextPage = () => {
             className={styles.field}
             readOnly
             rows={1}
+            value={outputValue}
           ></textarea>
         </div>
       </main>

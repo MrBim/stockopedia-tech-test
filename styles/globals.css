@@ -2,6 +2,7 @@
   --font-family: "Lato", -apple-system, sans-serif;
 
   --color-brand-primary: #4776ba;
+  --color-brand-primary-disabled: #99adcd;
   --color-success: #228745;
   --color-error: #cc4752;
 }
@@ -43,6 +44,10 @@ button {
   text-transform: uppercase;
   font-size: 13px;
   font-family: var(--font-family);
+}
+
+button:disabled{
+  background-color: var(--color-brand-primary-disabled);
 }
 
 label {
